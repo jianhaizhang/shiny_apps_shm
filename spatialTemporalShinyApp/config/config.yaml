@@ -1,0 +1,81 @@
+
+dataset12:
+  name: spatialTemporal_Narsai
+  data: example/expr_coleoptile_samTimeCon.txt
+  svg:
+  - example/oryza.sativa_coleoptile.ANT_shm.svg
+title:
+- title:Spatial Temporal Heatmap
+- width:350
+max.upload.size: 5G 
+default.dataset: spatialTemporal_Narsai
+col.row.gene: None
+separator: None
+hide.legend: 'No'
+data.matrix:
+- A:0
+- P:0
+- CV1:-10000
+- CV2:10000
+- log.exp:No
+- scale:Row
+- row.selected:1
+shm.img:
+- height:400
+- width:760
+- columns:1
+- display.by:gene
+- preserve.scale:Yes
+- color:yellow,orange,red
+- color.scale:Selected rows
+- file.type:NA
+- dpi:300
+- legend.width:0.7
+- legend.aspect.ratio:1
+- value.legend.rows:1
+- value.legend.key:0.03
+- value.legend.text:10
+- include.feature:No
+- line.color:grey70
+- line.size:0.1
+shm.anm:
+- show:No
+- transition:2
+- height:NA
+- width:770
+shm.video:
+- show:No
+- transition:1
+- height:0.9
+- width:0.92
+- dpi:400
+- value.legend:No
+- dimension:640x480
+legend:
+- key.row:8
+- key.size:0.026
+- label:No
+- label.size:2.5
+mhm:
+- measure:correlation
+- cor.absolute:No
+- select.by:p
+- cutoff:0.2
+- scale:No
+network:
+- color:yellow,orange,red
+- net.type:signed
+- min.size:15
+- ds:3
+- max.edges:10
+download_single:
+  data: example/expr_arab.txt
+  svg: example/arabidopsis_thaliana.shoot_shm.svg
+download_multiple:
+  data: example/random_data_multiple_aSVGs.txt
+  svg:
+  - example/arabidopsis_thaliana.organ_shm1.svg
+  - example/arabidopsis_thaliana.organ_shm2.svg
+download_spatial_temporal:
+  data: example/expr_coleoptile_samTimeCon.txt
+  svg: example/oryza.sativa_coleoptile.ANT_shm.svg
