@@ -7,22 +7,26 @@ dataset2:
   data: none
   svg: none
 dataset3:
-  name: customComputedData
-  data: none
-  svg: none
+  name: FIELD
+  data: example/FIELD.csv
+  svg: example/FIELD.svg
 dataset4:
-  name: root.cross
-  data: example/rice_plasticity.txt
-  svg: example/oryza.sativa_cross.sections.root.v7_shm.svg
+  name: PLATE
+  data: example/PLATE.csv
+  svg: example/PLATE.svg
 dataset5:
-  name: root.cross.long
-  data: example/rice_plasticity.txt
-  svg: example/oryza.sativa_cross.long.sections.root.v5_shm.svg
+  name: GH.SUB
+  data: example/GHSUB.csv
+  svg: example/GHSUB.svg
+dataset6:
+  name: GH.W.D.WL
+  data: example/GHWDWL.csv
+  svg: example/GHWDWL.svg
 title:
 - title:spatialHeatmap
 - width:350
 max.upload.size: 5G
-default.dataset: root.cross
+default.dataset: FIELD
 col.row.gene: None
 separator: None
 hide.legend: 'No'
@@ -50,7 +54,7 @@ shm.img:
 - value.legend.key:0.03
 - value.legend.text:10
 - include.feature:No
-- line.color:grey70
+- line.color:gray45
 - line.size:0.1
 shm.anm:
 - show:No

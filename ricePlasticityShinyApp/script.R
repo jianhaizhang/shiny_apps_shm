@@ -78,17 +78,26 @@ gg.all <- grob.lis.all[[1]][[3]]
 
 mar.lb <- sub.margin <- (1-c(129.33128, 32.871689)/129.33128*0.99)/2
 mar.lb <- mar.lb*100; mar.lb
-gg.all <- lapply(gg.all, function(x) x + theme(aspect.ratio=1/2, legend.position = "none"))
+gg.all <- gg.all[1]
+gg.all <- lapply(gg.all, function(x) x + theme(aspect.ratio=NULL, legend.position = "none"))
+
 gg.all[1:5] <- lapply(gg.all[1:5], function(x) x + theme(aspect.ratio=1/2, legend.position = "none"))
 gg.all[6:10] <- lapply(gg.all[6:10], function(x) x + theme(aspect.ratio=1/4, legend.position = "none"))
 gg.all <- lapply(gg.all, function(x) x + theme(aspect.ratio=1159.45/4582.11, legend.position = "none"))
 gg.all <- lapply(gg.all, function(x) x + theme(aspect.ratio=32.871689/129.33128, legend.position = "none"))
 gg.all <- lapply(gg.all, function(x) x + theme(aspect.ratio=1, legend.position = "none"))
-gg.all <- lapply(gg.all, function(x) x + theme(legend.position = "none", plot.margin=margin(mar.lb[2], mar.lb[1], mar.lb[2], mar.lb[1], "npc")))
-gg.all <- lapply(gg.all, function(x) x + theme(legend.position = "none", plot.margin=margin(mar.lb[2], mar.lb[1], mar.lb[2], mar.lb[1], "pt")))
 
-grob.all <- lapply(gg.all, ggplotGrob)
-grob.list <- grob.all
+
+lay_shm <- spatialHeatmap:::lay_shm
+lay.mat <- lay_shm(lay.shm=lay.shm, con[1:4], ncol=ncol, ID.sel, lay.mat = TRUE)
+
+mar.lb <- c(0, 0.37)
+gg.all <- lapply(gg.all, function(x) x + theme(legend.position = "none", plot.margin=margin(mar.lb[2], mar.lb[1], mar.lb[2], mar.lb[1], "npc")))
+
+grob.list <- lapply(gg.all, ggplotGrob)
+
+g.tr <- lapply(grob.list[seq_len(length(grob.list))], grobTree)
+
 
 grid.arrange(g.arr, g.arr, ncol=2, widths=unit(c(0.5, 0.5), 'npc'))
 grid.arrange(g.arr, ncol=1, widths=unit(c(1), 'npc'))

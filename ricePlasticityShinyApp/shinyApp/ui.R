@@ -17,9 +17,9 @@ shinyUI(dashboardPage(
       fileInput("svgInpath", "Step 2A: upload one aSVG file", accept=".svg", multiple=FALSE),
       fileInput("svgInpath1", "Step 2B: upload multiple aSVG files", accept=".svg", multiple=TRUE),
       fileInput("geneInpath", "Step 3: upload formatted data matrix", accept=c(".txt", ".csv"), multiple=FALSE),
-      radioButtons(inputId='dimName', label='Step 4: is column or row gene?', choices=c("None", "Row", "Column"), selected='None', inline=TRUE),
-      h4(strong("Custom computed data")),
-      fileInput("adj.modInpath", "Upload the adjacency matrix and module definition file", accept=".txt", multiple=TRUE)
+      radioButtons(inputId='dimName', label='Step 4: is column or row gene?', choices=c("None", "Row", "Column"), selected='None', inline=TRUE)
+      # h4(strong("Custom computed data")),
+      # fileInput("adj.modInpath", "Upload the adjacency matrix and module definition file", accept=".txt", multiple=TRUE)
 
       ),
       menuItem("Instruction", tabName="ins", icon=icon("info")),

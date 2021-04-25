@@ -40,12 +40,13 @@
 library(ggplot2); library(parallel)
 grob_list <- function(gene, con.na=TRUE, geneV, coord, ID, cols, tis.path, ft.trans=NULL, sub.title.size, ft.legend='identical', legend.col, legend.ncol=NULL, legend.nrow=NULL, legend.position='bottom', legend.direction=NULL, legend.key.size=0.02, legend.text.size=12, legend.plot.title=NULL, legend.plot.title.size=11, line.size=0.2, line.color='grey70', mar.lb=NULL, cores=2, ...) {
 
-   # save(gene, con.na, geneV, coord, ID, cols, tis.path, ft.trans, sub.title.size, ft.legend, legend.col, legend.ncol, legend.nrow, legend.position, legend.direction, legend.key.size, legend.text.size, legend.plot.title, legend.plot.title.size, line.size, line.color, mar.lb, cores, file='all')
+  # save(gene, con.na, geneV, coord, ID, cols, tis.path, ft.trans, sub.title.size, ft.legend, legend.col, legend.ncol, legend.nrow, legend.position, legend.direction, legend.key.size, legend.text.size, legend.plot.title, legend.plot.title.size, line.size, line.color, mar.lb, cores, file='all')
   
   # Main function to create SHMs and legend plot
   g_list <- function(con, lgd=FALSE, ...) {
     if (is.null(con)) cat('Legend plot ... \n') else cat(con, ' ')
     value <- feature <- x <- y <- tissue <- NULL; tis.df <- as.vector(unique(coord[, 'tissue']))
+    legend.col[legend.col == 'none'] <- NA
     # tis.path and tis.df have the same length by default, but not entries, since tis.df is appended '__\\d+' at the end.
     # Assign default colours to each path.
     g.col <- rep(NA, length(tis.path)); names(g.col) <- tis.df
@@ -77,12 +78,12 @@ grob_list <- function(gene, con.na=TRUE, geneV, coord, ID, cols, tis.path, ft.tr
       # Bottom legends are set for each SHM and then removed in 'ggplotGrob', but a copy with legend is saved separately for later used in video.
       scl.fil <- scale_fill_manual(values=g.col, breaks=tis.df[leg.idx], labels=tis.path[leg.idx], guide=guide_legend(title=NULL, ncol=legend.ncol, nrow=legend.nrow))
     } else { 
-      # Assign legend key colours if identical samples between SVG and matrix have colors of "none".
+      # Assign legend key colours if identical samples between SVG and matrix have colors of NA.
       legend.col1 <- legend.col[ft.legend] # Only includes matching samples. 
-      if (any(legend.col1=='none')) {
-         n <- sum(legend.col1=='none'); col.all <- grDevices::colors()[grep('honeydew|aliceblue|white|gr(a|e)y', grDevices::colors(), invert=TRUE)]
-         col.none <- col.all[seq(from=1, to=length(col.all), by=floor(length(col.all)/n))]
-         legend.col1[legend.col1=='none'] <- col.none[seq_len(n)]
+      if (any(is.na(legend.col1))) {
+         n <- sum(is.na(legend.col1)); col.all <- grDevices::colors()[grep('honeydew|aliceblue|white|gr(a|e)y', grDevices::colors(), invert=TRUE)]
+         col.na <- col.all[seq(from=1, to=length(col.all), by=floor(length(col.all)/n))]
+         legend.col1[is.na(legend.col1)] <- col.na[seq_len(n)]
        }
        # Map legend colours to tissues.
        # Exclude transparent tissues.
@@ -92,7 +93,7 @@ grob_list <- function(gene, con.na=TRUE, geneV, coord, ID, cols, tis.path, ft.tr
        # Keep all colors in the original SVG.
        g.col <- legend.col[sub('__\\d+$', '', names(g.col))]
        names(g.col) <- tis.df # Resolves legend.col['tissue'] is NA by default.
-       g.col[g.col=='none'] <- NA 
+       # g.col[g.col=='none'] <- NA 
        # Make selected tissues transparent by setting their colours NA.
        if (!is.null(ft.trans)) g.col[sub('__\\d+$', '', tis.df) %in% ft.trans] <- NA
        # Copy colors across same numbered tissues. 
@@ -121,13 +122,13 @@ grob_list <- function(gene, con.na=TRUE, geneV, coord, ID, cols, tis.path, ft.tr
     df0$value <- unlist(lis.v) 
     coord[idx1, ] <- df0; coord$line.size <- coord$line.size+line.size
     # If "data" is not in ggplot(), g$data slot is empty. x, y, and group should be in the same aes().
-    g <- ggplot(data=coord, aes(x=x, y=y, value=value, group=tissue, text=paste0('feature: ', feature, '\n', 'value: ', value)), ...)+geom_polygon(aes(fill=tissue), color=line.color, size=coord$line.size, linetype='solid')+scl.fil+theme(axis.text=element_blank(), axis.ticks=element_blank(), panel.grid=element_blank(), panel.background=element_rect(fill="white", colour="grey80"), axis.title.x=element_text(size=16, face="bold"), plot.title=element_text(hjust=0.5, size=sub.title.size), legend.box.margin=margin(-20, 0, 2, 0, unit='pt'), plot.margin=margin(0.005, 0.005, 0.005, 0.005, "npc"), aspect.ratio = (1 - mar.lb[2] * 2) / (1 - mar.lb[1] * 2))+labs(x="", y="")+scale_y_continuous(expand=c(0.01, 0.01))+scale_x_continuous(expand=c(0.01, 0.01))+lgd.par
+    g <- ggplot(data=coord, aes(x=x, y=y, value=value, group=tissue, text=paste0('feature: ', feature, '\n', 'value: ', value)), ...)+geom_polygon(aes(fill=tissue), color=line.color, size=coord$line.size, linetype='solid')+scl.fil+theme(axis.text=element_blank(), axis.ticks=element_blank(), panel.grid=element_blank(), panel.background=element_rect(fill="white", colour="grey80"), axis.title.x=element_text(size=16, face="bold"), plot.title=element_text(hjust=0.5, size=sub.title.size), legend.box.margin=margin(-20, 0, 2, 0, unit='pt'), plot.margin=margin(0.005, 0.005, 0.005, 0.005, "npc"), aspect.ratio = NULL)+labs(x="", y="")+scale_y_continuous(expand=c(0.01, 0.01))+scale_x_continuous(expand=c(0.01, 0.01))+lgd.par
     # if (is.null(mar.lb)) g <- g+theme(plot.margin=margin(0.005, 0.005, 0.005, 0.005, "npc")) else g <- g+theme(plot.margin=margin(mar.lb[2], mar.lb[1], mar.lb[2], mar.lb[1], "npc"))
     if (con.na==FALSE) g.tit <- ggtitle(k) else g.tit <- ggtitle(paste0(k, "_", con)); g <- g+g.tit
 
     if (lgd==TRUE) {
 
-      g <- g+theme(axis.text=element_blank(), axis.ticks=element_blank(), panel.grid=element_blank(), panel.background=element_rect(fill="white", colour="grey80"), plot.margin=margin(0.005, 0.005, 0.2, 0, "npc"), axis.title.x=element_text(size=16,face="bold"), plot.title=element_text(hjust=0.5, size=legend.plot.title.size))+ggtitle(legend.plot.title)
+      g <- g+theme(axis.text=element_blank(), axis.ticks=element_blank(), panel.grid=element_blank(), panel.background=element_rect(fill="white", colour="grey80"), plot.margin=margin(0.005, 0.005, 0.2, 0, "npc"), axis.title.x=element_text(size=16,face="bold"), plot.title=element_text(hjust=0.5, size=legend.plot.title.size), aspect.ratio = (1 - mar.lb[2] * 2) / (1 - mar.lb[1] * 2))+ggtitle(legend.plot.title)
 
     }; return(g)
 

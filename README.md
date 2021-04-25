@@ -1,1 +1,1 @@
-# The Shiny app of spatial-temporal heatmap.
+# Different instances of spatial-heatmap Shiny app.

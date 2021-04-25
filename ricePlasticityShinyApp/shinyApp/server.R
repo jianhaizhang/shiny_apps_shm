@@ -187,11 +187,13 @@ svg_suffix <- function(svg.path, svg.na) {
 # enableWGCNAThreads()
 shinyServer(function(input, output, session) {
 
+  # observeEvent(input$fileIn, { session$reload() })
+
   cfg <- reactiveValues(lis.dat=NULL, lis.dld=NULL, lis.par=NULL, na.def=NULL, dat.def=NULL, svg.def=NULL, pa.upl=NULL, pa.dat.upl=NULL, pa.svg.upl=NULL, na.cus=NULL)
 
   observe({
 
-    withProgress(message="loading dependencies: ", value=0, {
+    withProgress(message="Loading dependencies: ", value=0, {
     incProgress(0.3, detail="in progress ...")
     library(spatialHeatmap); library(SummarizedExperiment); library(shiny); library(shinydashboard); library(grImport); library(rsvg); library(ggplot2); library(DT) 
     incProgress(0.6, detail="in progress ...")
@@ -640,7 +642,7 @@ content=function(file=paste0(normalizePath(tempdir(check=TRUE), winslash="/", mu
     validate(need(try(!is.character(lis)), lis))
     svg.path <- lis$svg.path; svg.na <- lis$svg.na
  
-  withProgress(message="Tissue heatmap: ", value=0, {  
+  withProgress(message="Spatial heatmap: ", value=0, {  
     incProgress(0.5, detail="extracting coordinates, please wait ...") 
     # Whether a single or multiple SVGs, all are returned in a list.
     sf.all <- NULL; for (i in seq_along(svg.na)) { 
@@ -724,7 +726,7 @@ content=function(file=paste0(normalizePath(tempdir(check=TRUE), winslash="/", mu
     if ((input$fileIn %in% cfg$na.cus & 
     (!is.null(input$svgInpath)|!is.null(input$svgInpath1)))|(any(input$fileIn %in% cfg$na.def) & is.null(input$svgInpath))) {
 
-      withProgress(message="Tissue heatmap: ", value=0, {
+      withProgress(message="Spatial heatmap: ", value=0, {
     
         incProgress(0.5, detail="extracting coordinates, please wait ...")
           svg.path <- svg.path1()$svg.path; svg.na <- svg.path1()$svg.na
@@ -778,7 +780,7 @@ content=function(file=paste0(normalizePath(tempdir(check=TRUE), winslash="/", mu
     # Avoid repetitive computation.  
     pat.new <- paste0('^', gID$new, '_(', pat.con(), ')_\\d+$')
     if (any(grepl(pat.new, names(grob$all)))) return()
-    withProgress(message="Tissue heatmap: ", value=0, {
+    withProgress(message="Spatial heatmap: ", value=0, {
  
       incProgress(0.25, detail="preparing data ...")
       gene <- geneIn()[["gene2"]]
@@ -799,7 +801,7 @@ content=function(file=paste0(normalizePath(tempdir(check=TRUE), winslash="/", mu
         }
         size.key <- as.numeric(cfg$lis.par$legend['key.size', 'default'])
         # cores: the orders in svg.path(), names(svg.df.lis) are same.
-        grob.lis <- grob_list(gene=gene, con.na=geneIn0()[['con.na']], geneV=geneV(), coord=g.df, ID=ID, legend.col=fil.cols, cols=color$col, tis.path=tis.path, ft.trans=input$tis, sub.title.size=15, mar.lb=mar, legend.nrow=as.numeric(cfg$lis.par$legend['key.row', 'default']), legend.key.size=size.key, legend.text.size=8*size.key*33, line.size=input$line.size, line.color=input$line.color, cores=deter_core(2, svg.path()$svg.path[i])) # Only gID$new is used.
+        grob.lis <- grob_list(gene=gene, con.na=geneIn0()[['con.na']], geneV=geneV(), coord=g.df, ID=ID, legend.col=fil.cols, cols=color$col, tis.path=tis.path, ft.trans=input$tis, sub.title.size=20, mar.lb=mar, legend.nrow=as.numeric(cfg$lis.par$legend['key.row', 'default']), legend.key.size=size.key, legend.text.size=8*size.key*33, line.size=input$line.size, line.color=input$line.color, cores=deter_core(2, svg.path()$svg.path[i])) # Only gID$new is used.
         msg <- paste0(svg.na[i], ': no spatial features that have matching sample identifiers in data are detected!')
         if (is.null(grob.lis)) cat(msg, '\n')
         output$msg.shm <- ({ validate(need(!is.null(grob.lis), msg)) })
@@ -1011,8 +1013,12 @@ content=function(file=paste0(normalizePath(tempdir(check=TRUE), winslash="/", mu
     })
     
   observe({
+
+    svg.df.lis <- svg.df(); if (is.null(svg.df.lis)) return()
+    w.h <- svg.df.lis[[1]]$w.h
     lay <- lay.shm(); if (is.null(lay)) return()
-    output$shm <- renderPlot(width = ncol(lay) * 250 * 2, height = nrow(lay) * 300 * 2, {
+    col.val <- sum(unlist(lapply(seq_len(ncol(lay)), function(x) !all(is.na(lay[, x])))))
+    output$shm <- renderPlot(width = col.val * 250 * w.h[1] / w.h[2], height = nrow(lay) * 300 * 1, {
     if (col.reorder$col.re=='N') return()
     if.con <-  is.null(input$dt_rows_selected)|is.null(svg.df())|gID$geneID[1]=="none"|is.null(grob$all1)
     if (length(if.con==FALSE)==0) if (length(if.con)==0) return(); if (is.na(if.con)|if.con==TRUE) return(NULL)
@@ -1029,7 +1035,7 @@ content=function(file=paste0(normalizePath(tempdir(check=TRUE), winslash="/", mu
     lay <- input$gen.con; ID <- gID$geneID; ncol <- input$col.n
 
     shm.lay <- lay_shm(lay.shm=lay, con=con, ncol=ncol, ID.sel=ID, grob.list=grob.lis.p, shiny=TRUE); shm <- shm.lay$shm
-    if (input$ext!='NA') {
+    if (!is.null(input$ext))if (input$ext!='NA') {
       
       validate(need(try(input$res>0), 'Resolution should be a positive numeric!'))
       validate(need(try(input$lgd.w>=0 & input$lgd.w <1), 'Legend width should be between 0 to 1!'))
@@ -1120,16 +1126,18 @@ content=function(file=paste0(normalizePath(tempdir(check=TRUE), winslash="/", mu
 
       fluidRow(splitLayout(cellWidths=c('1%', '99%'), '',  checkboxGroupInput(inputId="tis", label="Select tissues to be transparent:", choices='', selected='', inline=TRUE))),
 
-      fluidRow(column(1, offset=0, style='padding-left:5px; padding-right:50px; padding-top:0px; padding-bottom:5px',
-      dropdownButton(inputId='dropdown', label='Download', circle=FALSE, icon=NULL, status='primary', inline=FALSE, width=800,
-      fluidRow(splitLayout(cellWidths=c('1%', '27%', '1%', '14%', '1%', '11%', '1%', '17%', '1%', '14%'), '',
-      radioButtons(inputId='ext', label='File type:', choices=c('NA', "png", "jpg", "pdf"), selected=cfg$lis.par$shm.img['file.type', 'default'], inline=TRUE), '',
-      numericInput(inputId='res', label='Resolustion (dpi):', value=as.numeric(cfg$lis.par$shm.img['dpi', 'default']), min=10, max=Inf, step=10, width=150), '',
-      numericInput(inputId='lgd.w', label='Legend width:', value=as.numeric(cfg$lis.par$shm.img['legend.width', 'default']), min=0, max=1, step=0.1, width=150), '',
-      numericInput(inputId='lgd.ratio', label='Legend aspect ratio:', value=as.numeric(cfg$lis.par$shm.img['legend.aspect.ratio', 'default']), min=0.0001, max=Inf, step=0.1, width=140), '', downloadButton("dld.shm", "Download")
-      )))
-      ),  
-      column(1, offset=0, style='padding-left:50px; padding-right:80px; padding-top:0px; padding-bottom:5px',
+      fluidRow(
+      # column(1, offset=0, style='padding-left:5px; padding-right:50px; padding-top:0px; padding-bottom:5px',
+      #dropdownButton(inputId='dropdown', label='Download', circle=FALSE, icon=NULL, status='primary', inline=FALSE, width=800,
+      #fluidRow(splitLayout(cellWidths=c('1%', '27%', '1%', '14%', '1%', '11%', '1%', '14%'), '',
+      #radioButtons(inputId='ext', label='File type:', choices=c('NA', "png", "jpg", "pdf"), selected=cfg$lis.par$shm.img['file.type', 'default'], inline=TRUE), '',
+      #numericInput(inputId='res', label='Resolustion (dpi):', value=as.numeric(cfg$lis.par$shm.img['dpi', 'default']), min=10, max=Inf, step=10, width=150), '',
+      #numericInput(inputId='lgd.w', label='Legend width:', value=as.numeric(cfg$lis.par$shm.img['legend.width', 'default']), min=0, max=1, step=0.1, width=150), '',
+      # numericInput(inputId='lgd.ratio', label='Legend aspect ratio:', value=as.numeric(cfg$lis.par$shm.img['legend.aspect.ratio', 'default']), min=0.0001, max=Inf, step=0.1, width=140), '', 
+      #downloadButton("dld.shm", "Download")
+      #)))
+      #),  
+      column(1, offset=0, style='padding-left:2px; padding-right:80px; padding-top:0px; padding-bottom:5px',
       dropdownButton(inputId='value.lgd', label='Value legend', circle=FALSE, icon=NULL, status='primary', inline=FALSE, width=500,
       fluidRow(splitLayout(cellWidths=c('1%', '25%', '1%', '13%', '1%', '17%', '1%', '14%', '1%', '28%'), '', 
       actionButton("val.lgd", "Add/Remove", icon=icon("refresh")), '',  
@@ -1141,7 +1149,7 @@ content=function(file=paste0(normalizePath(tempdir(check=TRUE), winslash="/", mu
       )),
       column(1, offset=0, style='padding-left:40px; padding-right:50px; padding-top:0px; padding-bottom:5px',
       dropdownButton(inputId='line', label='Shape outline', circle=FALSE, icon=NULL, status='primary', inline=FALSE, width=250,
-      selectInput('line.color', label='Line color:', choices=c('grey70', 'black', 'red', 'green', 'blue'), selected=cfg$lis.par$shm.img['line.color', 'default']),
+      selectInput('line.color', label='Line color:', choices=c('gray45', 'black', 'red', 'green', 'blue'), selected=cfg$lis.par$shm.img['line.color', 'default']),
       numericInput(inputId='line.size', label='Line size:', value=as.numeric(cfg$lis.par$shm.img['line.size', 'default']), min=0.05, max=Inf, step=0.05, width=150)
       ))
       ), verbatimTextOutput('msg.shm'),      fluidRow(splitLayout(cellWidths=c("1%", "7%", "91%", "1%"), "",plotOutput("bar1"), div(style = 'overflow-y:scroll;height:401px;', plotOutput("shm", height='100%', width = '100%')), "")))

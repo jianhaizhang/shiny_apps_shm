@@ -23,7 +23,9 @@
 #' @importFrom gridExtra arrangeGrob grid.arrange
 library(ggplot2); library(gridExtra)
 lay_shm <- function(lay.shm, con, ncol, ID.sel, grob.list = NULL, width = 1, height = 1, lay.mat = FALSE, shiny) {
-  
+
+  # save(lay.shm, con, ncol, ID.sel, grob.list, width, height, lay.mat, shiny, file='all.lay') 
+ 
   width <- as.numeric(width); height <- as.numeric(height); ncol <- as.numeric(ncol); con <- unique(con)
   grob.all.na <- names(grob.list)
   if (lay.shm=="gene"|lay.shm=="none") {
