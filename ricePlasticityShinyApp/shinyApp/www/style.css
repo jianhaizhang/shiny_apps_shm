@@ -74,6 +74,10 @@ ul {
   position: static
 }
 
+/* selectizeInput */
+.selectize-dropdown.multi.form-control.shinyjs-resettable.plugin-selectize-plugin-a11y {
+  position: sticky; z-index: 10
+}
 
 /* Customized tooltip. */
 .tp {

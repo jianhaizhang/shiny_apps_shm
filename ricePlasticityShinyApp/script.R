@@ -11,10 +11,49 @@ system.time(
 shm5 <- spatial_hm(svg.path=svg5, data=mat, ID=c('OS01G0136050'), legend.r=1, legend.nrow=6, line.size=0.1, cores=1) 
 )
 
+# Gene annotation.
+library(biomaRt)
+mart <- useMart(biomart="plants_mart", dataset="osativa_eg_gene", host="plants.ensembl.org")
+ann.os <- getBM(attributes=c("affy_rice", "ensembl_gene_id", "external_gene_name", "uniprot_gn_symbol", "go_id", "name_1006", "namespace_1003", "description", "entrezgene_id"), mart=mart)
+# ann.os <- subset(ann.os, go_id!="")
+
+colnames(ann.os) <-c("affyID", "RAPID", "name", "symbol", "goID", "goTerm", "subOnt", "description", "entrezID")
+ann.os$RAPID <- toupper(ann.os$RAPID)  
+ann.os <- subset(ann.os, grepl("^OS", ann.os$RAPID))
+
+ann.os$metadata <- paste0(ann.os$name, ': ', ann.os$description)
+ann.os[grep("cellular_component", ann.os$subOnt), "subOnt"] <- "CC"
+ann.os[grep("molecular_function", ann.os$subOnt), "subOnt"] <- "MF"
+ann.os[grep("biological_process", ann.os$subOnt), "subOnt"] <- "BP"
+
+cache.pa <- '~/.cache/os_ann'
+save_cache(dir=cache.pa, overwrite=TRUE, ann.os)
+ann.os <- read_cache(cache.pa, 'ann.os')
+
+# The row names are same.
+field <- read_fr('shinyApp/example/FIELD.csv')
+sub <- read_fr('shinyApp/example/GHSUB.csv')
+wdwl <- read_fr('shinyApp/example/GHWDWL.csv')
+plate <- read_fr('shinyApp/example/PLATE.csv')
+
+# Append annotation to each row.
+dat_met <- function(ann.os, file) {
+  dat <- read_fr(file)
+  ann.os <- subset(ann.os, !duplicated(RAPID) & RAPID %in% rownames(dat))
+  rownames(ann.os) <- ann.os$RAPID; ann.os <- ann.os[rownames(dat), ]
+  dat$metadata <- ann.os$metadata
+  print(dat[1:2, ])
+  write.table(dat, file, col.names=TRUE, row.names=TRUE, sep=',')
+}
+
+dat_met(ann.os1, 'shinyApp/example/FIELD.csv')
+dat_met(ann.os1, 'shinyApp/example/GHSUB.csv')
+dat_met(ann.os1, 'shinyApp/example/GHWDWL.csv')
+dat_met(ann.os1, 'shinyApp/example/PLATE.csv')
+
 
 library(ggplot2)
 ids <- factor(c("1.1", "2.1", "1.2", "2.2", "1.3", "2.3"))
-
 values <- data.frame(id = ids, value = c(3, 3.1, 3.1, 3.2, 3.15, 3.5))
 
 positions <- data.frame(
