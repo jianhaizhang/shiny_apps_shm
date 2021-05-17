@@ -36,7 +36,7 @@ data.matrix:
 - CV2:10000
 - log.exp:No
 - scale:Row
-- row.selected:1
+- selected.id:OS01G0100100
 shm.img:
 - columns:2
 - display.by:gene
@@ -56,7 +56,6 @@ shm.img:
 - line.color:grey70
 - line.size:0.1
 shm.anm:
-- show:No
 - transition:2
 - scale.plot:1
 shm.video:
