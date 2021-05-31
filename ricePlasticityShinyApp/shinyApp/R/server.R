@@ -526,7 +526,7 @@ data_server <- function(id, ipt, cfg, sch, lis.url, ids, deg = FALSE, session) {
   mods$data <- dat.mod.lis <- data_server('dat', ipt, cfg, sch, lis.url, ids, deg=FALSE)
 
 mods$search <- sch.mod.lis <- search_server('sear', ids, cfg, lis.url, dat.mod.lis)
-mods$search <- sch.mod.lis <- search_server('landing', ids, cfg, lis.url, dat.mod.lis)
+# mods$search <- sch.mod.lis <- search_server('landing', ids, cfg, lis.url, dat.mod.lis)
  
 shm_server <- function(id, ipt, cfg, sch, lis.url, dat.mod.lis, sch.mod.lis, session) {  
   moduleServer(id, function(input, output, session) {

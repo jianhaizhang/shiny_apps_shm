@@ -82,7 +82,7 @@ img, video, iframe {
 
 /*All genes in dropdown list.*/
 .selectize-dropdown-content {
-  position:absolute; z-index:5; background:#f6f6f6
+  position:absolute; z-index:5; background:#f6f6f6; width:100%
 }
 
 /* Search button. Dots are special characters in CSS, and should be escaped. So #sear-ids.but or [id='sear-ids.but'] is right. 
@@ -103,6 +103,12 @@ img, video, iframe {
 .selectize-input.items.not-full.has-options has-items {
   display:table-cell
 }
+
+/*Data table.*/
+table#DataTables_Table_0 {
+  position:sticky !important
+}
+
 
 /*Content of dropdown menu.*/
 #dropdown-menu-shmAll-scaleDrop, #dropdown-menu-shmAll-scroDrop, #dropdown-menu-shmAll-colDrop {

@@ -72,10 +72,10 @@ path_br_all <- get('path_br_all', envir=asNamespace('spatialHeatmap'), inherits=
 # 'a' nodes are not removed.
 svg_attr <- get('svg_attr', envir=asNamespace('spatialHeatmap'), inherits=FALSE)
 
-svg_df <- get('svg_df', envir=asNamespace('spatialHeatmap'), inherits=FALSE)
+# svg_df <- get('svg_df', envir=asNamespace('spatialHeatmap'), inherits=FALSE)
 
 # Separate SHMs of grob and ggplot. Different SHMs (under different SVGs) of same 'gene_condition' are indexed with suffixed of '_1', '_2', ...
-gg_shm <- get('gg_shm', envir=asNamespace('spatialHeatmap'), inherits=FALSE)
+# gg_shm <- get('gg_shm', envir=asNamespace('spatialHeatmap'), inherits=FALSE)
 grob_shm <- get('grob_shm', envir=asNamespace('spatialHeatmap'), inherits=FALSE)
 
 # Subset data matrix by correlation or distance measure.

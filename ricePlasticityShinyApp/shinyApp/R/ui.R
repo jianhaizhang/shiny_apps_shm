@@ -59,7 +59,7 @@ data_ui <- function(id, deg = FALSE) {
   }
 }
 
-upload_ui <- function(id, search.ui) {
+upload_ui <- function(id) {
    ns <- NS(id)
    tabPanel("Landing Page", value='upload',
       # box(width = 12, title = 'Upload data & aSVGs', closable = FALSE, solidHeader = TRUE, collapsible = TRUE, enable_sidebar = FALSE, status = "primary", enable_dropdown = FALSE,
@@ -69,8 +69,7 @@ upload_ui <- function(id, search.ui) {
       # fluidRow(splitLayout(cellWidths=c('1%', '20%', '1%', '75%'), '', 
       # selectInput(ns("fileIn"), 'Select a data set', c('none'), 'none'), '', search.ui
       # )), br(),
-      column(2, selectInput(ns("fileIn"), 'Select a data set', c('none'), 'none')),
-      column(10, search.ui),
+      column(12, selectInput(ns("fileIn"), 'Select a data set', c('none'), 'none', width='30%')), 
       h4(strong("Spatial heatmap gallery")),
       fluidRow(
         column(4, id='field', style='text-align:center', uiOutput(ns('field')), tags$img(width='97%', src="image/field.png")),
@@ -417,7 +416,7 @@ ui <- function(request) {
     
       #column(8, ), column(1, actionButton("url.but", "Recover bookmarked URL entirely"), style="margin-top:-10px;margin-left:70px;margin-right:5px"),
     fluidRow( 
-      do.call(tabsetPanel, append(list(type = "pills", id = 'shm.sup', selected="upload", upload_ui('upl', search_ui('landing'))), shm_ui('shmAll', data_ui('dat'), search_ui('sear'))))
+      do.call(tabsetPanel, append(list(type = "pills", id = 'shm.sup', selected="upload", upload_ui('upl')), shm_ui('shmAll', data_ui('dat'), search_ui('sear'))))
       #tabsetPanel(type = "pills", id=NULL, selected="primary",
       #  data_ui('dat') # deg_ui('deg'),
       #)
