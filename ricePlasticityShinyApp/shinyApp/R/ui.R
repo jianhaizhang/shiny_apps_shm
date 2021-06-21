@@ -1,4 +1,4 @@
-library(shiny); library(shinydashboard); library(shinydashboardPlus); library(yaml); library(plotly); library(visNetwork); library(DT); library(shinyWidgets); library(shinyBS); library(shinyjs)
+library(shiny); library(shinydashboard); library(shinydashboardPlus); library(yaml); library(plotly); library(DT); library(shinyWidgets); library(shinyBS); library(shinyjs)
 lis.cfg <- yaml.load_file('config/config.yaml')
 tit <- sub('^(title|width):', '', lis.cfg$title)
 

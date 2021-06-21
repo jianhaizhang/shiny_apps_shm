@@ -42,12 +42,12 @@ server <- function(input, output, session) {
     incProgress(0.3, detail="in progress ...")
     library(spatialHeatmap); library(SummarizedExperiment); library(shiny); library(shinydashboard); library(shinydashboardPlus); library(grImport); library(rsvg); library(ggplot2); library(DT) 
     incProgress(0.6, detail="in progress ...")
-    library(gridExtra); library(ggdendro); library(WGCNA); library(grid); library(xml2); library(plotly); library(data.table); library(genefilter); library(flashClust); library(visNetwork); 
+    library(gridExtra); library(ggdendro); library(grid); library(xml2); library(plotly); library(data.table); library(genefilter) 
     showModal(modal(title = HTML('<center><b>Welcome to spatialHeatmap!</b><center>'), msg = strong('Please wait for the landing page to finish!')))
     incProgress(0.9, detail="in progress...")
-   library(reshape2); library(igraph); library(animation); library(av); library(shinyWidgets); library(yaml); library(HDF5Array); library(sortable); library(shinyBS); library(shinyjs); library(htmltools)
+   library(reshape2); library(igraph); library(animation); library(av); library(shinyWidgets); library(yaml); library(shinyBS); library(shinyjs); library(htmltools)
     # DEG
-    library(gplots); library(UpSetR)
+    # library(gplots); library(UpSetR)
   })
   })
 
@@ -1072,7 +1072,7 @@ network_server <- function(id, ipt, cfg, dat.mod.lis, shm.mod.lis, sch.mod.lis, 
     
   })
 
-  output$vis <- renderVisNetwork({
+  if (0) output$vis <- renderVisNetwork({
 
     if (length(ids$sel)==0) return()
     if (ipt$fileIn=="NONE"|is.null(vis.net())) return(NULL)
