@@ -1,11 +1,7 @@
 dataset1:
-  name: none
-  data: none
-  svg: none
-dataset2:
-  name: customData
-  data: none
-  svg: none
+  name: NONE
+  data: NONE
+  svg: NONE
 dataset3:
   name: FIELD
   data: example/FIELD.csv
@@ -54,7 +50,7 @@ shm.img:
 - value.legend.text:10
 - include.feature:No
 - line.color:grey70
-- line.size:0.1
+- line.size:0.02
 shm.anm:
 - transition:2
 - scale.plot:1
@@ -68,6 +64,7 @@ shm.video:
 - feature.label:No
 - label.size:2
 - dimension:640x480
+- bar.width.video:0.1
 legend:
 - key.row:2
 - key.size:0.04

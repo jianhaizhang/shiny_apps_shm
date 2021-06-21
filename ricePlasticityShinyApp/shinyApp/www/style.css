@@ -49,12 +49,13 @@ label[for='search'] { display: table-cell; text-align: center; vertical-align: m
 /* All tabs. */
 /* .tabbable > .nav > li > a {background-color: grey; color:black} */
 /* .tabbable > .nav > li > a[data-value='shm'] {background-color: #2471A3; color:white} */
-.tabbable > .nav > li > a {background-color: #2471A3; color:white}
-
+.tabbable > .nav > li > a {background-color:#337ab7; color:white}
 
 .tabbable > .nav > li[class=active] > a {background-color:#337ab7; color:white}
 
 .nav-pills>li.active>a, .nav-pills>li.active>a:focus, .nav-pills>li.active>a:hover {border-top-color:red;}
+
+.tabbable > ul[id='shmMhNet'] > li > a {background-color:#54a1d2; color:white}
 
 /* Avoid overflowing in fluidrow and splitLayout. */
 .shiny-split-layout > div {overflow: visible;}
@@ -104,11 +105,17 @@ img, video, iframe {
   display:table-cell
 }
 
+/* Top search box in the DEG table. */
+div.form-group.has-feedback {
+  z-index:0 !important
+}
+
+
 /*Data table.*/
+
 table#DataTables_Table_0 {
   position:sticky !important
 }
-
 
 /*Content of dropdown menu.*/
 #dropdown-menu-shmAll-scaleDrop, #dropdown-menu-shmAll-scroDrop, #dropdown-menu-shmAll-colDrop {
@@ -236,28 +243,37 @@ span {
 
 /*Image gallery in landing page. */
 
-#field img, #plate img, #sub img, #dwl img, #inter img, #vdo img {
+#field img, #plate img, #sub img, #wdwl img {
   transition: transform linear 0.5s; transition-delay: 0.5s;
 }
 
-#field:hover, #plate:hover, #sub:hover, #dwl:hover, #inter:hover, #vdo:hover {
+#field:hover, #plate:hover, #sub:hover, #wdwl:hover {
   z-index: 5
 }
 
-#field img:hover, #dwl img:hover {
-  transform: scale(3); transform-origin: left;
+#field img:hover, #sub img:hover {
+  transform: scale(2); transform-origin: left;
 }
 
-#plate img:hover, #inter img:hover {
+#shootArab img:hover, #mouse img:hover {
   transform: scale(3); transform-origin: center;
 }
           
-#sub img:hover {
-  transform: scale(3); transform-origin: right;
+#plate img:hover, #wdwl img:hover {
+  transform: scale(2); transform-origin: right;
 }
 
-#vdo img:hover {
-  transform: scale(2); transform-origin: right;
+/*HTML file in About. */
+body { text-align: justify }
+
+
+button[id='sear-sch.sgl.but'], button[id='sear-sch.mul.but'], button[id='deg-deg-sch.sgl.but'], button[id='deg-deg-sch.mul.but'], button[id='dat-dat.all.but'], a[id='shmAll-dld.shm'], button[id='shmAll-match'], button[id='shmAll-val.lgd'] {
+ margin-top:2px;margin-bottom:-10px;margin-left:20px;padding-top:2px;padding-bottom:2px;background-color:#ddd
+}
+
+/*tooltip in shinyBS. */
+div[class='tooltip-inner'] {
+  text-align: left
 }
 
 
