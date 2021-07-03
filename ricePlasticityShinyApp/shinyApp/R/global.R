@@ -39,6 +39,21 @@ url_val <- function(na, lis.url) {
 
 # Import internal functions.
 
+check <- function(data, fun) {                                                                                                  
+  er.wa <- tryCatch({ fun(data) }, error=function(e){ return('error') }, warning=function(w) { return('warning') } )            
+  return(er.wa)                                                                                                                  
+}
+
+df_is_as <- function(data, fun=is.numeric) {                                                                                     
+  dim.na <- dimnames(data)
+  # apply(na, 2, is.na): requires much more memory than vapply.                                                                                                     
+  if (identical(fun, is.na)) vap <- vapply(seq_len(ncol(data)), function(i) { fun(data[, i]) }, logical(nrow(data))) else if (identical(fun, as.numeric)) vap <- vapply(seq_len(ncol(data)), function(i) { fun(data[, i]) }, numeric(nrow(data))) else if (identical(fun, is.numeric)) vap <- vapply(seq_len(ncol(data)), function(i) { fun(data[, i]) }, logical(1))                        
+  # is.numeric always returns one value.
+  if (nrow(data)==1 | identical(fun, is.numeric)) vap <- matrix(vap, byrow=TRUE, ncol=ncol(data))                                
+  if (!identical(fun, is.numeric)) dimnames(vap) <- dim.na else { rownames(vap) <- dim.na[[1]][1]; colnames(vap) <- dim.na[[2]] }
+  return(vap)
+}   
+
 scale_all <- get('scale_all', envir=asNamespace('spatialHeatmap'), inherits=FALSE)
 
 venn_inter <- get('venn_inter', envir=asNamespace('spatialHeatmap'), inherits=FALSE)

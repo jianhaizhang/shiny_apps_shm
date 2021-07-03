@@ -1147,18 +1147,38 @@ shm_server <- function(id, ipt, cfg, sch, lis.url, url.id, dat.mod.lis, sch.mod.
     # if (any(is.na(gID$geneSel))) gID$geneSel <- "none"
   })
 
-  geneV <- reactive({
-    cat('All colour key values ... \n')
-    validate(need(!any(is.na(gID$geneSel)) & gID$geneSel[1]!='', ''))
-    # if (any(is.na(gID$geneSel))) return()
-    if (is.null(geneIn())|sum(gID$geneSel[1]!='none')==0) return(NULL)
-    if (input$cs.v=="Selected rows" & length(ids$sel)==0) return(NULL)
-    if (ipt$fileIn!="NONE") { if (input$cs.v=="Selected rows") gene <- geneIn()[["df.aggr.tran"]][gID$geneSel, ]
-    if (input$cs.v=="All rows") gene <- geneIn()[["df.aggr.tran"]] }
-    if (!all(gID$geneSel %in% rownames(gene))) return()
-    cat('Done!\n'); seq(min(gene), max(gene), len=1000) # len must be same with that from the function "spatial_hm()". Otherwise the mapping of a gene value to the colour bar is not accurate. 
-
+  output$msg.sig.thr <- renderText({
+    sig.max <- input$sig.max; sig.min <- input$sig.min
+    er.wa1 <- er.wa2 <- 1
+    if (sig.min!='') er.wa1 <- check(sig.min, as.numeric)
+    if (sig.max!='') er.wa2 <- check(sig.max, as.numeric)
+    if (!is.numeric(c(er.wa1, er.wa2))) return('Signal thresholds must be numeric!') else return()
   })
+
+  geneV <- reactive({ 
+    cat('All colour key values ... \n') 
+    geneIn <- geneIn(); df.aggr.tran <- geneIn$df.aggr.tran
+    validate(need(!any(is.na(gID$geneSel)) & gID$geneSel[1]!='', '')) 
+    # if (any(is.na(gID$geneSel))) return()
+    if (is.null(geneIn)|sum(gID$geneSel[1]!='none')==0) return(NULL) 
+    if (input$cs.v=="Selected rows" & length(ids$sel)==0) return(NULL) 
+    if (ipt$fileIn!="NONE") { if (input$cs.v=="Selected rows") gene <- df.aggr.tran[gID$geneSel, ]
+    if (input$cs.v=="All rows") gene <- df.aggr.tran } 
+    if (!all(gID$geneSel %in% rownames(gene))) return()
+    min.v <- min(gene); max.v <- max(gene)
+    input$sig.but; isolate({
+      sig.max <- input$sig.max; sig.min <- input$sig.min
+      if (sig.min!='') {
+        er.wa <- check(sig.min, as.numeric)
+        if (is.numeric(er.wa)) min.v <- er.wa
+      } 
+      if (sig.max!='') {
+        er.wa <- check(sig.max, as.numeric)
+        if (is.numeric(er.wa)) max.v <- er.wa
+      }
+    })
+    cat('Done!\n'); seq(min.v, max.v, len=1000) # len must be same with that from the function "spatial_hm()". Otherwise the mapping of a gene value to the colour bar is not accurate.
+  })     
 
   col.sch <- reactive({
     cat('Color scheme ... \n') 
@@ -1190,18 +1210,19 @@ shm_server <- function(id, ipt, cfg, sch, lis.url, url.id, dat.mod.lis, sch.mod.
   })
   x.title <- reactiveValues(val='')
   observe({
-    scale.dat <- scaleDat(); if (is.null(scale.dat)) return()
-    if (!is.null(scale.dat)) if (scale.dat=='No') title <- 'No scaling' else if (scale.dat=='Row') title <- 'Scaled by row' else if (scale.dat=='Selected') title <- 'Scaled across selected genes' else if (scale.dat=='All') title <- 'Scaled across all genes' else title <- ''
-    x.title$val <- paste0(title, ' (TPM)')
+    scale.dat <- scaleDat(); geneV <- geneV()
+    if (is.null(scale.dat)|is.null(geneV)) return()
+    if (!is.null(scale.dat)) if (scale.dat=='No') title <- 'no scaling' else if (scale.dat=='Row') title <- 'scaled by row' else if (scale.dat=='Selected') title <- 'scaled across selected genes' else if (scale.dat=='All') title <- 'scaled across all genes' else title <- ''
+    x.title$val <- paste0('TPM: ', title, ' (threshold: ', round(min(geneV), 2), '-', round(max(geneV), 2), ')')
   })
   shm.bar <- reactive({
-    cat('Colour key ... \n')
-    if (is.null(gID$all)) return(NULL)
-    if ((any(ipt$fileIn %in% cfg$na.def) & !is.null(geneIn()))|(ipt$fileIn %in% cfg$na.cus & (!is.null(ipt$svgInpath1)|!is.null(ipt$svgInpath2)) & !is.null(geneIn()))) {
-      if (length(color$col=="none")==0|input$color==""|is.null(geneV())) return(NULL)
+    cat('Colour key ... \n'); if (is.null(gID$all)) return(NULL)
+    geneIn <- geneIn(); geneV <- geneV()
+    if ((any(ipt$fileIn %in% cfg$na.def) & !is.null(geneIn))|(ipt$fileIn %in% cfg$na.cus & (!is.null(ipt$svgInpath1)|!is.null(ipt$svgInpath2)) & !is.null(geneIn))) {
+      if (length(color$col=="none")==0|input$color==""|is.null(geneV)) return(NULL)
       withProgress(message="Color scale: ", value = 0, {
         incProgress(0.75, detail="plotting, please wait ...")
-        cs.g <- col_bar(geneV=geneV(), cols=color$col, width=1, x.title=x.title$val, x.title.size=10)
+        cs.g <- col_bar(geneV=geneV, cols=color$col, width=1, x.title=x.title$val, x.title.size=10)
         cat('Done! \n'); return(cs.g)
       })
     }
@@ -1499,7 +1520,7 @@ shm_server <- function(id, ipt, cfg, sch, lis.url, url.id, dat.mod.lis, sch.mod.
   # Use "observeEvent" to replace "observe" and list events (input$log, input$tis, ...), since if the events are in "observe", every time a new gene is clicked, "input$dt_rows_selected" causes the evaluation of all code in "observe", and the evaluation is duplicated with "gs.new".
   observeEvent(col.na(), { if (col.cfm()>0) col.reorder$col.re <- 'N' })
   # Update SHMs, above theme().
-  observeEvent(list(log(), input$tis, color$col, input$cs.v, col.cfm(), scaleDat(), input$match, input$line.size, input$line.color), {
+  observeEvent(list(log(), input$tis, color$col, input$sig.but, input$cs.v, col.cfm(), scaleDat(), input$match, input$line.size, input$line.color), {
     shm$grob.all <- shm$gg.all <- shm$lgd.all <- shm$grob.gg.all <- NULL; gs.all <- reactive({ 
       cat('Updating all SHMs ... \n')
       if.con <- is.null(svg.df())|is.null(geneIn())|length(ids$sel)==0|color$col[1]=='none'|gID$geneSel[1]=='none'
@@ -1929,7 +1950,7 @@ shm_server <- function(id, ipt, cfg, sch, lis.url, url.id, dat.mod.lis, sch.mod.
     if (!is.null(input$t)) validate(need(try(input$t>=0.1), 'Transition time should be at least 0.1 second!'))
   })
 
-  observeEvent(list(fineIn=ipt$fileIn, log=log(), tis=input$tis, col.but=input$col.but, cs.v=input$cs.v, preScale=input$preScale), { ggly_rm(); vdo_rm() })
+  observeEvent(list(ipt$fileIn, log(), input$tis, input$col.but, input$sig.but, input$cs.v, input$preScale), { ggly_rm(); vdo_rm() })
 
   # Once dimension of each frame is changed, delete previous frames.
   observeEvent(list(input$scale.ly), {
@@ -2003,7 +2024,7 @@ shm_server <- function(id, ipt, cfg, sch, lis.url, url.id, dat.mod.lis, sch.mod.
     updateNumericInput(session, 't', label='Transition time (s)', value=as.numeric(cfg$lis.par$shm.anm['transition', 'default']), min=0.1, max=Inf, step=0.5)
     updateNumericInput(session, 'scale.ly', label='Scale plot', value = as.numeric(cfg$lis.par$shm.anm['scale.plot', 'default']), min=0.1, max=Inf, step=0.1)
   })
-  observeEvent(list(log=log(), tis=input$tis, col.but=input$col.but, cs.v=input$cs.v, preScale=input$preScale, ggly.but=input$ggly.but, fm=input$fm), {
+  observeEvent(list(log(), input$tis, input$col.but, input$sig.but, input$cs.v, input$preScale, input$ggly.but, input$fm), {
   
   output$ggly <- renderUI({
     scale.ly <- input$scale.ly; gly.url <- gly.url()
