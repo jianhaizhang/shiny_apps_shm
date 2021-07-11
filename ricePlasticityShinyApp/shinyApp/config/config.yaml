@@ -31,7 +31,7 @@ data.matrix:
 - CV1:-10000
 - CV2:10000
 - log.exp:No
-- scale:Row
+- scale:No
 - selected.id:OS01G0100100
 shm.img:
 - columns:2

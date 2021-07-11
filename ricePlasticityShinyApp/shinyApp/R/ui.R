@@ -28,20 +28,15 @@ data_ui <- function(id, deg=FALSE) {
   ns <- NS(id)
   # if (deg == FALSE) tabPanel("Primary Visualization", value='primary',
   if (deg==FALSE) box(width = 12, title = "Data (replicates aggregated)", closable = FALSE, solidHeader = TRUE, collapsible = TRUE, enable_sidebar = FALSE, status = "primary", enable_dropdown = FALSE,
-    tabsetPanel(type="pills", id=NULL, selected="dTabSel",
-      tabPanel('Selected', value='dTabSel',
-        fluidRow(splitLayout(cellWidths=c("1%", "98%", "1%"), "", dataTableOutput(ns("dtSel")), "")), br()
-      ),
-      tabPanel('Selected Profile', value='dTabSelProf',
-        fluidRow(splitLayout(cellWidths=c("1%", "98%", "1%"), "", plotOutput(ns("selProf")), ""))
-      ),
+    tabsetPanel(type="pills", id=NULL, selected="dTabAll",
       tabPanel('Complete', value='dTabAll',
       navbarPage('Parameters:',
       tabPanel("Basic",
-      fluidRow(splitLayout(cellWidths=c('1%', '15%', '1%', '15%', '1%', '15%'), '',
-      actionButton(ns("dat.all.but"), "Confirm selection"), '',
+      fluidRow(splitLayout(cellWidths=c('1%', '15%', '1%', '15%', '1%', '15%', '1%', '15%'), '',
+      actionButton(ns("dat.all.but"), "Confirm selection", style = "margin-top: 24px;"), '',
       selectInput(inputId=ns('log'), label='Log/exp-transform', choices=c("No", 'Log2'="log2", 'Exp2'="exp2"), selected='No'), '', 
-      selectInput(inputId=ns('scaleDat'), label='Scale by', choices=c('No'='No', 'Row'='Row', 'Selected'='Selected', 'All'='All'), selected='Row')
+      selectInput(inputId=ns('scaleDat'), label='Scale by', choices=c('No'='No', 'Row'='Row', 'Selected'='Selected', 'All'='All'), selected='Row'), '',
+      numericInput(ns('page'), label="Page height", value=300, min=50, max=Inf, step=100, width=150)
       )),
       bsTooltip(id=ns('normDat'), title="CNF: calcNormFactors in edgeR. <br/> ESF: estimateSizeFactors in DESeq2. <br/> VST: varianceStabilizingTransformation in DESeq2. <br/> rlog: regularized log in DESeq2.", placement = "top", trigger = "hover"),
       bsTooltip(id=ns('scaleDat'), title="Row: scale each row independently. <br/> Selected: scale across all selected genes as a whole. <br/> All: scale across all genes as a whole.", placement = "top", trigger = "hover"),
@@ -54,10 +49,23 @@ data_ui <- function(id, deg=FALSE) {
       numericInput(inputId=ns("CV1"), label="Min coefficient of variation (CV1)", value=-10^4), '', 
       numericInput(inputId=ns("CV2"), label="Max coefficient of variation (CV2)", value=10^4)
       )), actionButton(inputId=ns('fil.but'), label="Submit"), verbatimTextOutput(ns("fil.par")) 
+      ),
+      tabPanel("Threshold",
+      fluidRow(splitLayout(cellWidths=c('1%', '20%', '1%', '20%', '1%', '10%'), '', 
+      textInput(ns("sig.max"), "Signal threshold (max)", '', placeholder=('Default to max signal.'), width=200), '',
+      textInput(ns("sig.min"), "Signal threshold (min)", '', placeholder=('Default to min signal.'), width=200), '',
+      actionButton(ns("sig.but"), "Confirm", icon=NULL, style = "margin-top: 24px;")
+      )), br(), span(uiOutput(ns('msg.sig.thr')), style='color:red')  
       )
       ), # navbarPage 
       fluidRow(splitLayout(cellWidths=c("1%", "98%", "1%"), "", dataTableOutput(ns("dtAll")), ""))
-     ) # tabPanel('Complete'
+     ), # tabPanel('Complete'
+      tabPanel('Selected', value='dTabSel',
+        fluidRow(splitLayout(cellWidths=c("1%", "98%", "1%"), "", dataTableOutput(ns("dtSel")), "")), br()
+      ),
+      tabPanel('Selected Profile', value='dTabSelProf',
+        fluidRow(splitLayout(cellWidths=c("1%", "98%", "1%"), "", plotOutput(ns("selProf")), ""))
+      )
    ) # tabsetPanel(
 
   ) else if (deg == TRUE) {
@@ -132,12 +140,6 @@ shm_ui <- function(id, data.ui, search.ui) {
       dropdownButton(inputId=ns('dropdown'), label='Color key', circle=FALSE, icon=NULL, status='primary', inline=FALSE, width=250,
       fluidRow(splitLayout(cellWidths=c('1%', '60%', '35%'), '', textInput(ns("color"), "Color scheme", '', placeholder=paste0('Eg: ', ''), width=200),
       actionButton(ns("col.but"), "Confirm", icon=NULL, style = "margin-top: 24px;"))),
-      fluidRow(splitLayout(cellWidths=c('1%', '60%', '35%'), '',
-      textInput(ns("sig.max"), "Signal threshold (max)", '', placeholder=('Default to max signal.'), width=200))),
-      fluidRow(splitLayout(cellWidths=c('1%', '60%', '35%'), '',
-      textInput(ns("sig.min"), "Signal threshold (min)", '', placeholder=('Default to min signal.'), width=200),
-      actionButton(ns("sig.but"), "Confirm", icon=NULL, style = "margin-top: 24px;"))),
-      span(uiOutput(ns('msg.sig.thr')), style='color:red'), 
       radioButtons(inputId=ns('cs.v'), label='Color key based on', choices=c("Selected rows", "All rows"), selected='', inline=TRUE)
       ), '', 
       dropdownButton(inputId=ns('togDrop'), label='Horizontal layout', circle=FALSE, icon=NULL, status='primary', inline=FALSE, width=250,
